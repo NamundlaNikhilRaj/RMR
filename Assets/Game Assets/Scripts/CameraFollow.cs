@@ -4,31 +4,29 @@ using UnityEngine;
 
 public class CameraFollow : MonoBehaviour
 {
-    public Transform player; // Reference to the player's transform
-    public Vector3 offset;   // Offset between the player and the camera
-    public float smoothSpeed = 0.125f; // Speed at which the camera follows the player
+    public Transform player;
+    public Vector3 offset;
+    public float smoothSpeed = 0.125f;
+    public float heightOffset = 2f; // New variable for additional height
 
     void Start()
     {
-        // Initialize the offset based on initial positions (if not set manually in Inspector)
         if (offset == Vector3.zero)
         {
+            // Add extra height to the initial offset
             offset = transform.position - player.position;
+            offset.y += heightOffset; // Adds extra height
         }
     }
 
     void LateUpdate()
     {
-        // Desired position of the camera based on the player's position + offset
         Vector3 desiredPosition = player.position + offset;
-
-        // Smoothly move the camera towards the desired position
         Vector3 smoothedPosition = Vector3.Lerp(transform.position, desiredPosition, smoothSpeed);
-
-        // Apply the new position to the camera
         transform.position = smoothedPosition;
 
-        // Optionally make the camera look at the player (helps for 3D platformers)
-        transform.LookAt(player);
+        // Modified LookAt to aim slightly above the player
+        Vector3 lookAtPosition = player.position + Vector3.up * heightOffset * 0.5f;
+        transform.LookAt(lookAtPosition);
     }
 }

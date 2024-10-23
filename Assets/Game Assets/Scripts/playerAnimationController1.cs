@@ -1,11 +1,18 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI; // Add this to use UI elements
 
+
 public class PlayerController1 : MonoBehaviour
 {
+    public TextMeshPro countText; // UI Text element for displaying coin count
+    private int coinCount = 0; // Coin counter
+
+  
+
     Animator animator;
     Rigidbody rb;
     public float moveSpeed = 5f;
@@ -17,10 +24,19 @@ public class PlayerController1 : MonoBehaviour
     public Button leftButton;
     public Button rightButton;
     public Button jumpButton;
+    public TextMeshPro DisplayText;
+
+    public GameObject questionPanel;
+    public GameObject ResetUI;
+    public GameObject leftBUtton1;
+    public GameObject RightBUtton1;
+    public GameObject UPBUtton1;
 
     // Variables to track button states
     private bool isLeftPressed = false;
     private bool isRightPressed = false;
+
+
 
 
     // Name of your game over scene
@@ -28,9 +44,13 @@ public class PlayerController1 : MonoBehaviour
 
     void Start()
     {
+
+        // Initialize the coin count display
+        UpdateCoinCountText();
+
         animator = GetComponent<Animator>();
         rb = GetComponent<Rigidbody>();
-        Debug.Log("Animator and Rigidbody initialized");
+        //Debug.Log("Animator and Rigidbody initialized");
 
         // Add listeners to the buttons
         if (leftButton != null)
@@ -127,39 +147,86 @@ public class PlayerController1 : MonoBehaviour
     // New method for trigger collision detection
     private void OnTriggerEnter(Collider other)
     {
+        if (other.gameObject.CompareTag("coin"))
+        {
+            // Increment the coin counter
+            coinCount++;
+
+            // Update the coin count text on the UI
+            UpdateCoinCountText();
+            Destroy(other.gameObject);
+
+        }
+
         if (other.CompareTag("Enemy"))
         {
             //HandleGameOver();
             SceneManager.LoadScene(gameOverSceneName);
         }
-    }
 
-    // New method to handle game over
-    /*private void HandleGameOver()
-    {
-        // You can add death animation or particle effects here
-        StartCoroutine(GameOverSequence());
-    }
-
-    // Coroutine for game over sequence
-    private IEnumerator GameOverSequence()
-    {
-        // Disable player movement
-        enabled = false;
-
-        // You could trigger death animation here if you have one
-        if (animator != null)
+        if (other.CompareTag("Wrong"))
         {
-            // Assuming you have a "death" animation
-            // animator.SetTrigger("death");
-
-            // Wait for animation to complete (adjust time as needed)
-            yield return new WaitForSeconds(1f);
+            DisplayText.text = "Wrong Answer";
+            Debug.Log("Wrong Answer");
+            ResetUI.SetActive(true);
+            questionPanel.SetActive(false);
+            leftBUtton1.SetActive(false);
+            RightBUtton1.SetActive(false);
+            UPBUtton1.SetActive(false);
+            //HandleGameOver();
+            // SceneManager.LoadScene(gameOverSceneName);
         }
 
-        // Load game over scene
-        SceneManager.LoadScene(gameOverSceneName);
+        if (other.CompareTag("Right"))
+        {
+            questionPanel.SetActive(false);
+            DisplayText.text = "Right Answer";
+            Debug.Log("Right Answer");
+            //HandleGameOver();
+            //SceneManager.LoadScene(gameOverSceneName);
+        }
     }
-    */
 
+
+
+
+    // Update the UI text with the current coin count
+    void UpdateCoinCountText()
+    {
+        countText.text = "Coins: " + coinCount.ToString();
+        
+    }
 }
+
+
+
+
+
+
+// New method to handle game over
+/*private void HandleGameOver()
+{
+    // You can add death animation or particle effects here
+    StartCoroutine(GameOverSequence());
+}
+
+// Coroutine for game over sequence
+private IEnumerator GameOverSequence()
+{
+    // Disable player movement
+    enabled = false;
+
+    // You could trigger death animation here if you have one
+    if (animator != null)
+    {
+        // Assuming you have a "death" animation
+        // animator.SetTrigger("death");
+
+        // Wait for animation to complete (adjust time as needed)
+        yield return new WaitForSeconds(1f);
+    }
+
+    // Load game over scene
+    SceneManager.LoadScene(gameOverSceneName);
+}
+*/

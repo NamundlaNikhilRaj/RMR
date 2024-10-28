@@ -3,74 +3,132 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.UI; // Add this to use UI elements
-
+using UnityEngine.UI;
+using UnityEngine.EventSystems;  // Add this for pointer events
 
 public class PlayerController1 : MonoBehaviour
 {
-    public TextMeshPro countText; // UI Text element for displaying coin count
-    private int coinCount = 0; // Coin counter
-
-  
+    public TextMeshPro countText;
+    private int coinCount = 0;
 
     Animator animator;
     Rigidbody rb;
     public float moveSpeed = 5f;
     public float rotationSpeed = 10f;
     public float jumpForce = 5f;
-    private bool isGrounded = true;
+    public bool isGrounded = true;
 
-    // Add variables for UI buttons
+    public TextMeshPro DisplayText;
+    public GameObject questionPanel;
+    public GameObject ResetUI;
+
+    // Add references for the UI buttons
     public Button leftButton;
     public Button rightButton;
     public Button jumpButton;
-    public TextMeshPro DisplayText;
-
-    public GameObject questionPanel;
-    public GameObject ResetUI;
-    public GameObject leftBUtton1;
-    public GameObject RightBUtton1;
-    public GameObject UPBUtton1;
 
     // Variables to track button states
-    private bool isLeftPressed = false;
-    private bool isRightPressed = false;
+    private bool isLeftPressed;
+    private bool isRightPressed;
+    private bool isJumpPressed;
 
-
-
-
-    // Name of your game over scene
     public string gameOverSceneName = "GameOver";
 
     void Start()
     {
-
-        // Initialize the coin count display
         UpdateCoinCountText();
-
         animator = GetComponent<Animator>();
         rb = GetComponent<Rigidbody>();
-        //Debug.Log("Animator and Rigidbody initialized");
 
-        // Add listeners to the buttons
+        // Add button listeners for left button
         if (leftButton != null)
-            leftButton.onClick.AddListener(() => StartLeftMovement());
+        {
+            EventTrigger leftTrigger = leftButton.gameObject.GetComponent<EventTrigger>();
+            if (leftTrigger == null)
+                leftTrigger = leftButton.gameObject.AddComponent<EventTrigger>();
+
+            EventTrigger.Entry pointerDown = new EventTrigger.Entry();
+            pointerDown.eventID = EventTriggerType.PointerDown;
+            pointerDown.callback.AddListener((data) => { isLeftPressed = true; });
+            leftTrigger.triggers.Add(pointerDown);
+
+            EventTrigger.Entry pointerUp = new EventTrigger.Entry();
+            pointerUp.eventID = EventTriggerType.PointerUp;
+            pointerUp.callback.AddListener((data) => { isLeftPressed = false; });
+            leftTrigger.triggers.Add(pointerUp);
+        }
+
+        // Add button listeners for right button
         if (rightButton != null)
-            rightButton.onClick.AddListener(() => StartRightMovement());
+        {
+            EventTrigger rightTrigger = rightButton.gameObject.GetComponent<EventTrigger>();
+            if (rightTrigger == null)
+                rightTrigger = rightButton.gameObject.AddComponent<EventTrigger>();
+
+            EventTrigger.Entry pointerDown = new EventTrigger.Entry();
+            pointerDown.eventID = EventTriggerType.PointerDown;
+            pointerDown.callback.AddListener((data) => { isRightPressed = true; });
+            rightTrigger.triggers.Add(pointerDown);
+
+            EventTrigger.Entry pointerUp = new EventTrigger.Entry();
+            pointerUp.eventID = EventTriggerType.PointerUp;
+            pointerUp.callback.AddListener((data) => { isRightPressed = false; });
+            rightTrigger.triggers.Add(pointerUp);
+        }
+
         if (jumpButton != null)
-            jumpButton.onClick.AddListener(() => TriggerJump());
+        {
+            EventTrigger jumpTrigger = jumpButton.gameObject.GetComponent<EventTrigger>();
+            if (jumpTrigger == null)
+                jumpTrigger = jumpButton.gameObject.AddComponent<EventTrigger>();
 
-        // Add listeners for when buttons are released (requires additional setup in Unity)
-        if (leftButton != null)
-            leftButton.onClick.AddListener(() => StopLeftMovement());
-        if (rightButton != null)
-            rightButton.onClick.AddListener(() => StopRightMovement());
+            EventTrigger.Entry pointerDown = new EventTrigger.Entry();
+            pointerDown.eventID = EventTriggerType.PointerDown;
+            pointerDown.callback.AddListener((data) => { isJumpPressed = true; });
+            jumpTrigger.triggers.Add(pointerDown);
+
+            EventTrigger.Entry pointerUp = new EventTrigger.Entry();
+            pointerUp.eventID = EventTriggerType.PointerUp;
+            pointerUp.callback.AddListener((data) => { isJumpPressed = false; });
+            jumpTrigger.triggers.Add(pointerUp);
+        }
+
+        // Add jump button listener
+       /* if (jumpButton != null)
+        {
+            jumpButton.onClick.AddListener(HandleJumpButtonClick);
+            Flipmoment();
+        }*/
     }
 
     void Update()
     {
+        // Check for flip combinations
+        if (isGrounded)
+        {
+            if (isRightPressed && isJumpPressed)
+            {
+                animator.SetTrigger("Isflip");
+            }
+            if (isLeftPressed && isJumpPressed)
+            {
+                animator.SetTrigger("Isflip");
+            }
+            if (!isLeftPressed && isJumpPressed)
+            {
+                HandleJumpButtonClick();
+            }
+            if (!isRightPressed && isJumpPressed)
+            {
+                HandleJumpButtonClick();
+            }
+        }
+
         HandleMovement();
+        
     }
+
+
 
     void HandleMovement()
     {
@@ -94,30 +152,8 @@ public class PlayerController1 : MonoBehaviour
         }
     }
 
-    // Methods to handle button presses
-    public void StartLeftMovement()
-    {
-        isLeftPressed = true;
-        isRightPressed = false;
-    }
-
-    public void StartRightMovement()
-    {
-        isRightPressed = true;
-        isLeftPressed = false;
-    }
-
-    public void StopLeftMovement()
-    {
-        isLeftPressed = false;
-    }
-
-    public void StopRightMovement()
-    {
-        isRightPressed = false;
-    }
-
-    public void TriggerJump()
+    // New method to handle jump button click
+    public void HandleJumpButtonClick()
     {
         if (isGrounded)
         {
@@ -130,7 +166,7 @@ public class PlayerController1 : MonoBehaviour
         animator.SetBool("isJumping", true);
         isGrounded = false;
         animator.SetBool("isIdle", false);
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(0.2f);
         rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
     }
 
@@ -144,23 +180,17 @@ public class PlayerController1 : MonoBehaviour
         }
     }
 
-    // New method for trigger collision detection
     private void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.CompareTag("coin"))
         {
-            // Increment the coin counter
             coinCount++;
-
-            // Update the coin count text on the UI
             UpdateCoinCountText();
             Destroy(other.gameObject);
-
         }
 
         if (other.CompareTag("Enemy"))
         {
-            //HandleGameOver();
             SceneManager.LoadScene(gameOverSceneName);
         }
 
@@ -170,11 +200,9 @@ public class PlayerController1 : MonoBehaviour
             Debug.Log("Wrong Answer");
             ResetUI.SetActive(true);
             questionPanel.SetActive(false);
-            leftBUtton1.SetActive(false);
-            RightBUtton1.SetActive(false);
-            UPBUtton1.SetActive(false);
-            //HandleGameOver();
-            // SceneManager.LoadScene(gameOverSceneName);
+            rightButton.gameObject.SetActive(false);
+            leftButton.gameObject.SetActive(false);
+            jumpButton.gameObject.SetActive(false);
         }
 
         if (other.CompareTag("Right"))
@@ -182,51 +210,11 @@ public class PlayerController1 : MonoBehaviour
             questionPanel.SetActive(false);
             DisplayText.text = "Right Answer";
             Debug.Log("Right Answer");
-            //HandleGameOver();
-            //SceneManager.LoadScene(gameOverSceneName);
         }
     }
 
-
-
-
-    // Update the UI text with the current coin count
     void UpdateCoinCountText()
     {
         countText.text = "Coins: " + coinCount.ToString();
-        
     }
 }
-
-
-
-
-
-
-// New method to handle game over
-/*private void HandleGameOver()
-{
-    // You can add death animation or particle effects here
-    StartCoroutine(GameOverSequence());
-}
-
-// Coroutine for game over sequence
-private IEnumerator GameOverSequence()
-{
-    // Disable player movement
-    enabled = false;
-
-    // You could trigger death animation here if you have one
-    if (animator != null)
-    {
-        // Assuming you have a "death" animation
-        // animator.SetTrigger("death");
-
-        // Wait for animation to complete (adjust time as needed)
-        yield return new WaitForSeconds(1f);
-    }
-
-    // Load game over scene
-    SceneManager.LoadScene(gameOverSceneName);
-}
-*/

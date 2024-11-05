@@ -13,6 +13,7 @@ public class PlayerController1 : MonoBehaviour
 
     Animator animator;
     Rigidbody rb;
+
     public float moveSpeed = 5f;
     public float rotationSpeed = 10f;
     public float jumpForce = 5f;
@@ -123,12 +124,8 @@ public class PlayerController1 : MonoBehaviour
                 HandleJumpButtonClick();
             }
         }
-
         HandleMovement();
-        
     }
-
-
 
     void HandleMovement()
     {
@@ -169,7 +166,6 @@ public class PlayerController1 : MonoBehaviour
         yield return new WaitForSeconds(0.2f);
         rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
     }
-
     private void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.CompareTag("Ground"))

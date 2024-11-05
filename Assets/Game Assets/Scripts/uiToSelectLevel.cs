@@ -20,6 +20,11 @@ public class uiToSelectLevel : MonoBehaviour
         SceneManager.LoadScene("RMR_Code");
     }
 
+    public void RMRL2()
+    {
+        SceneManager.LoadScene("RMR_CodeLV2");
+    }
+
     public void Quit()
     {
         Application.Quit();

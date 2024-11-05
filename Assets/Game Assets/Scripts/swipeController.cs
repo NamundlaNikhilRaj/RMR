@@ -43,7 +43,7 @@ public class swipeController : MonoBehaviour
             targetPos -= pageStep;
             MovePage();
         }
-    
+
     }
 
     void MovePage()

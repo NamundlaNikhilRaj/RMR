@@ -17,4 +17,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Game Assets/Scenes/RMR.unity
     guid: c1175747a0c698f47a0bb1d04bdc81b4
+  - enabled: 1
+    path: Assets/Game Assets/Scenes/RMR_CodeLV2.unity
+    guid: 4df82c9b1e836434986942db74586b99
   m_configObjects: {}
